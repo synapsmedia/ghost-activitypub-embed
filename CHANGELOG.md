@@ -1,3 +1,10 @@
+## [0.1.3](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.1.2...v0.1.3) (2025-08-24)
+
+
+### Bug Fixes
+
+* github release integration ([f31b531](https://github.com/synapsmedia/ghost-activitypub-embed/commit/f31b5311b1fb94e316e54e46e384a4be6055eb90))
+
 ## [0.1.2](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.1.1...v0.1.2) (2025-08-24)
 
 
