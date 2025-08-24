@@ -1,0 +1,51 @@
+{
+  "name": "@synapsmedia/ghost-activitypub-embed",
+  "version": "0.0.0-dev",
+  "description": "Web component to display ActivityPub feeds from Ghost blogs",
+  "main": "ghap-embed.js",
+  "module": "ghap-embed.js",
+  "files": [
+    "ghap-embed.js"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "semantic-release": "semantic-release"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/synapsmedia/ghost-activitypub-embed.git"
+  },
+  "keywords": [
+    "web-component",
+    "ghost",
+    "activitypub",
+    "fediverse"
+  ],
+  "author": "Synaps Media",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/synapsmedia/ghost-activitypub-embed/issues"
+  },
+  "homepage": "https://github.com/synapsmedia/ghost-activitypub-embed#readme",
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^9.2.6",
+    "@semantic-release/npm": "^11.0.2",
+    "semantic-release": "^22.0.12"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "release": {
+    "branches": ["main"],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/github",
+      "@semantic-release/git"
+    ]
+  }
+}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ghost ActivityPub Feed Demo</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    h1 {
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    
+    .demo-container {
+      margin: 30px 0;
+    }
+    
+    .input-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    
+    button {
+      background: #4a65ff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    button:hover {
+      background: #3a50e0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ghost ActivityPub Feed Demo</h1>
+  
+  <div class="input-group">
+    <label for="feed-url">ActivityPub Feed URL:</label>
+    <input 
+      id="feed-url" 
+      type="text" 
+      value="https://muratcorlu.com"
+      placeholder="Enter ActivityPub feed URL">
+    <button id="load-feed">Load Feed</button>
+  </div>
+
+  <div class="demo-container">
+    <!-- The web component will be inserted here -->
+    <ghost-activitypub-feed url="https://muratcorlu.com"></ghost-activitypub-feed>
+  </div>
+
+  <script src="ghap-embed.js"></script>
+  <script>
+    // Initialize the component with the ability to change URLs
+    document.getElementById('load-feed').addEventListener('click', () => {
+      const url = document.getElementById('feed-url').value.trim();
+      if (url) {
+        const feedElement = document.querySelector('ghost-activitypub-feed');
+        feedElement.setAttribute('url', url);
+      }
+    });
+  </script>
+</body>
+</html>
