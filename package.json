@@ -1,6 +1,6 @@
 {
   "name": "@synapsmedia/ghost-activitypub-embed",
-  "version": "0.0.0-dev",
+  "version": "0.1.1",
   "description": "Web component to display ActivityPub feeds from Ghost blogs",
   "main": "ghap-embed.js",
   "module": "ghap-embed.js",
@@ -38,7 +38,9 @@
     "access": "public"
   },
   "release": {
-    "branches": ["main"],
+    "branches": [
+      "main"
+    ],
     "plugins": [
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
