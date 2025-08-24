@@ -200,11 +200,8 @@ class GhostActivityPubEmbed extends HTMLElement {
      * Fetch and display feed data
      */
     async fetchFeed() {
-      let url = new URL(this.getAttribute('url'));
-      if (!url) {
-        url = new URL(document.location.href);
-      }
 
+      const url = new URL(this.getAttribute('url') || document.location.href);
       
       try {
         // Fetch the main outbox
