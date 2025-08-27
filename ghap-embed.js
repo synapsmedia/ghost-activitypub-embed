@@ -2,11 +2,6 @@ const styles = `
 :host {
   display: block;
 }
-:host * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
 .feed-container {
   --background-color: var(--ghap-background-color, #fff);
   --text-color: var(--ghap-text-color, #000);
@@ -18,6 +13,11 @@ const styles = `
   border-radius: 10px;
   border: solid 1px var(--ghap-border-color, rgb(229, 233, 235));
   overflow: hidden;
+}
+.feed-container :where(*:not(dialog)) {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 .profile-header {
   border-bottom: 1px solid var(--ghap-border-color, rgb(229, 233, 235));
@@ -95,8 +95,9 @@ const styles = `
   color: rgb(124 139 154);
   font-size: 1.3em;
 }
-.feed-item-image {
+.feed-item .feed-item-image {
   max-width: 100%;
+  max-height: 200px;
   height: auto;
   margin-top: 0.5rem;
   border-radius: 4px;
@@ -111,6 +112,37 @@ const styles = `
   color: #e53935;
   border: 1px solid #e53935;
   border-radius: 4px;
+}
+dialog {
+  border: none;
+  padding: 0;
+  background: transparent;
+  width: 100%;
+}
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+dialog button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-size: 20px;
+  background-color: rgba(21, 23, 26, 0.5);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  justify-content: center;
+  vertical-align: middle;
+  align-items: center;
+}
+dialog .feed-item-image {
+  display: block;
+  margin: auto;
+  max-width: 100vw;
+  max-height: 100vh;
 }
 `
 
@@ -264,7 +296,8 @@ class GhostActivityPubEmbed extends HTMLElement {
           });
         }
         
-        this.shadowRoot.querySelector('.feed-container').innerHTML = `${profileHeaderHTML}${html}`;
+        const attachmentModal = `<dialog><button><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button><div class="dialog-content"></div></dialog>`
+        this.shadowRoot.querySelector('.feed-container').innerHTML = `${attachmentModal}${profileHeaderHTML}${html}`;
         
       } catch (error) {
         console.error('Error fetching feed:', error);
@@ -273,9 +306,38 @@ class GhostActivityPubEmbed extends HTMLElement {
         `;
       }
     }
+    
+    initDialog() {
+      if (this.dialogInitiated) return;
+      
+      this.dialog = this.shadowRoot.querySelector('dialog');
+      this.dialogContent = this.dialog.querySelector('.dialog-content');
+      const dialogCloser = this.dialog.querySelector('button');
+      
+      dialogCloser.addEventListener('click', () => {
+        this.dialog.close();
+      });
+      
+      this.dialogInitiated = true;
+      console.log('dialogInitiated');
+    }
+  
+    showAttachment(content) {
+      console.log('showAttachment');
+      this.initDialog();
+      console.log('sed content')
+      this.dialogContent.innerHTML = content.outerHTML;
+      this.dialog.showModal();
+    }
   
     connectedCallback() {
       this.fetchFeed();
+      
+      this.shadowRoot.addEventListener('click', (event) => {
+        if (event.target.matches('.feed-item .feed-item-image')) {
+          this.showAttachment(event.target);
+        }
+      }, false)
     }
   
     attributeChangedCallback(name, oldValue, newValue) {
