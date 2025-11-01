@@ -7,11 +7,13 @@ const styles = `
   --text-color: var(--ghap-text-color, #000);
   --padding: var(--ghap-padding, 1rem);
 
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "avenir next", avenir, "helvetica neue", helvetica, ubuntu, roboto, noto, "segoe ui", arial, sans-serif;
-  font-size: 10px;
+  font-family: var(--ghap-font-family, var(--gh-font-body, Inter -apple-system BlinkMacSystemFont 'avenir next' avenir 'helvetica neue' helvetica ubuntu roboto noto 'segoe ui' arial sans-serif));
+  font-size: var(--ghap-font-size, 10px);
   max-width: 100%;
-  border-radius: 10px;
-  border: solid 1px var(--ghap-border-color, rgb(229, 233, 235));
+  border-radius: var(--ghap-border-radius, 10px);
+  border-color: var(--ghap-border-color, rgb(229, 233, 235));
+  border-style: solid;
+  border-width: var(--ghap-border-width, 1px);
   overflow: hidden;
 }
 .feed-container :where(*:not(dialog)) {
@@ -64,10 +66,10 @@ const styles = `
   display: flex;
   gap: 1rem;
 }
-.feed-author .feed-author-icon {
+.feed-author .feed-author-avatar {
   width: var(--icon-size);
 }
-.feed-author .feed-author-icon img {
+.feed-author .feed-author-avatar img {
   width: var(--icon-size);
   height: var(--icon-size);
   border-radius: 50%;
@@ -180,7 +182,7 @@ class GhostActivityPubEmbed extends HTMLElement {
   
     renderProfileHeader(profileData) {
       return `
-        <div class="profile-header">
+        <div class="profile-header" part="header">
           <img class="profile-image" src="${profileData.image.url}">
           <div class="profile-info">
             <img class="profile-icon" src="${profileData.icon.url}">
@@ -206,17 +208,17 @@ class GhostActivityPubEmbed extends HTMLElement {
         }
         
         return `
-          <div class="feed-item">
-            <div class="feed-author">
-              <div class="feed-author-icon">
+          <div class="feed-item" part="feed-item">
+            <div class="feed-author" part="feed-author">
+              <div class="feed-author-avatar" part="feed-author-avatar">
                 <img src="${profileData.icon.url}">
               </div>
-              <div class="feed-author-meta">
+              <div class="feed-author-meta" part="feed-author-meta">
                 <div class="feed-author-name">${profileData.name}</div>
                 <div class="feed-author-username">@${profileData.preferredUsername}@${profileData.serverHost} · <span class="feed-author-date">${this.formatDate(published)}</span></div>
               </div>
             </div>
-            <div class="feed-item-content">
+            <div class="feed-item-content" part="feed-item-content">
               ${ note.content }
               ${attachment}
             </div>
@@ -331,6 +333,7 @@ class GhostActivityPubEmbed extends HTMLElement {
     }
   
     connectedCallback() {
+      console.log('connectedCallback');
       this.fetchFeed();
       
       this.shadowRoot.addEventListener('click', (event) => {
@@ -350,3 +353,4 @@ class GhostActivityPubEmbed extends HTMLElement {
   // Register the custom element
   customElements.define('ghost-activitypub-embed', GhostActivityPubEmbed);
   
+  console.log('ghost-activitypub-embed registered');
