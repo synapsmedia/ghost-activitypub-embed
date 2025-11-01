@@ -1,3 +1,10 @@
+# [0.2.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.1.4...v0.2.0) (2025-08-27)
+
+
+### Features
+
+* simple lightbox for attachments ([72ae5eb](https://github.com/synapsmedia/ghost-activitypub-embed/commit/72ae5eb085e1e25e2abcfa468aa37418d7ddaa47))
+
 ## [0.1.4](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.1.3...v0.1.4) (2025-08-24)
 
 
