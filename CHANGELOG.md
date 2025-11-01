@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.2.0...v0.3.0) (2025-11-01)
+
+
+### Features
+
+* more customisation options with CSS ([953bec0](https://github.com/synapsmedia/ghost-activitypub-embed/commit/953bec022f8da917e243ad3779fd799e50c3539b))
+
 # [0.2.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.1.4...v0.2.0) (2025-08-27)
 
 
