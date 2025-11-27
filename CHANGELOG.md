@@ -1,3 +1,10 @@
+# [0.5.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.4.0...v0.5.0) (2025-11-27)
+
+
+### Features
+
+* added follow button with little guidance ([3e1637a](https://github.com/synapsmedia/ghost-activitypub-embed/commit/3e1637adfcf2580d7ef0bb2005ab04159272067b))
+
 # [0.4.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.3.0...v0.4.0) (2025-11-27)
 
 
