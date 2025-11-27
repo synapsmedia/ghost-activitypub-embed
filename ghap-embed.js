@@ -43,13 +43,16 @@ const styles = `
   cursor: pointer;
   font-family: var(--font-family);
 }
-
+.profile-image-placeholder {
+  height: 100px;
+}
 .profile-image {
   width: 100%;
   height: 300px;
   object-fit: cover;
 }
-.profile-icon {
+.profile-icon,
+.profile-icon-placeholder {
   --icon-size: var(--profile-icon-size, 90px);
   --icon-border-size: var(--profile-icon-border-size, 5px);
   width: var(--icon-size);
@@ -60,6 +63,7 @@ const styles = `
   background-color: #fff;
   outline: #15171a1a;
 }
+
 .profile-name {
   font-size: 2.2em;
   padding-inline: var(--padding);
@@ -282,10 +286,10 @@ class GhostActivityPubEmbed extends HTMLElement {
   renderProfileHeader(profileData) {
     return `
         <div class="profile-header" part="header">
-          <img class="profile-image" src="${profileData.image.url}">
+          ${ profileData.image?.url ? `<img class="profile-image" src="${profileData.image.url}">` : '<div class="profile-image-placeholder"></div>' }
           <div class="profile-info">
             <div class="profile-info-header">
-              <img class="profile-icon" src="${profileData.icon.url}">
+              ${ profileData.icon?.url ? `<img class="profile-icon" src="${profileData.icon.url}">` : '<div class="profile-icon-placeholder"></div>' }
               <button class="ghap-follow-button">Follow</button>
             </div>
             <h2 class="profile-name">${profileData.name}</h2>
@@ -342,8 +346,8 @@ class GhostActivityPubEmbed extends HTMLElement {
 
     const proxyMode = proxy.hostname !== url.hostname;
 
-    const path = endpoint.replace(`${url.origin}/.ghost/activitypub/`, '');
-
+    const path = endpoint.replace('www.', '').replace(`${url.origin}/.ghost/activitypub/`, '');
+    
     const baseUrl = proxyMode ? proxy.origin : url.origin;
 
     try {
@@ -504,4 +508,3 @@ class GhostActivityPubEmbed extends HTMLElement {
 
 // Register the custom element
 customElements.define('ghost-activitypub-embed', GhostActivityPubEmbed);
-
