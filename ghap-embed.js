@@ -51,6 +51,43 @@ const styles = `
   font-size: 1.5em;
   padding-inline: var(--padding);
 }
+.profile-username {
+  display: flex;
+  gap: 5px;
+}
+.profile-username a {
+  color: var(--ghap-text-color);
+  text-decoration: none;
+}
+.profile-username button {
+  color: var(--ghap-text-color);
+  opacity: 0.5;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  height: 24px;
+  width: 24px;
+  transition: opacity 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.profile-username button:hover {
+  opacity: 1;
+}
+.profile-username button svg {
+  stroke-width: 1.5px;
+}
+.profile-username .copy-handle-success {
+  opacity: 0;
+  color: green;
+  transition: opacity 0.2s ease;
+}
+.copy-handle.copied + .copy-handle-success {
+  opacity: 1;
+}
+
 .feed-item {
   --icon-size: var(--ghap-feed-item-icon-size, 40px);
   display: flex;
@@ -187,7 +224,13 @@ class GhostActivityPubEmbed extends HTMLElement {
           <div class="profile-info">
             <img class="profile-icon" src="${profileData.icon.url}">
             <h2 class="profile-name">${profileData.name}</h2>
-            <p class="profile-username">@${profileData.preferredUsername}@${profileData.serverHost}</p>
+            <p class="profile-username">
+              <a href="https://${profileData.serverHost}" target="_blank">@${profileData.preferredUsername}@${profileData.serverHost}</a>
+              <button class="copy-handle" data-handle="@${profileData.preferredUsername}@${profileData.serverHost}" title="Copy handle">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+              </button>
+              <span class="copy-handle-success">Copied!</span>
+            </p>
             <p class="profile-description">${profileData.summary}</p>
           </div>
         </div>`;
@@ -339,6 +382,16 @@ class GhostActivityPubEmbed extends HTMLElement {
       this.shadowRoot.addEventListener('click', (event) => {
         if (event.target.matches('.feed-item .feed-item-image')) {
           this.showAttachment(event.target);
+        }
+        
+        if (event.target.matches('.copy-handle *')) {
+          const copyHandleButton = this.shadowRoot.querySelector('.copy-handle');
+
+          navigator.clipboard.writeText(copyHandleButton.getAttribute('data-handle'));
+          copyHandleButton.classList.add('copied');
+          setTimeout(() => {
+            copyHandleButton.classList.remove('copied');
+          }, 2000);
         }
       }, false)
     }
