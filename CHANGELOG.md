@@ -1,3 +1,10 @@
+# [0.6.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.5.0...v0.6.0) (2025-11-27)
+
+
+### Features
+
+* added proxy server support ([0b5c4bd](https://github.com/synapsmedia/ghost-activitypub-embed/commit/0b5c4bdfe09f2fab67a20d357a48c33a07fbc529))
+
 # [0.5.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.4.0...v0.5.0) (2025-11-27)
 
 
