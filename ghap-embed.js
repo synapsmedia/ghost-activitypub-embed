@@ -257,16 +257,16 @@ class GhostActivityPubEmbed extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['url'];
+    return ['url', 'proxy'];
   }
 
   _profileData = null;
 
-  _copyHandleButton = ({preferredUsername, serverHost}) => `<button class="copy-handle" data-handle="@${preferredUsername}@${serverHost}" title="Copy handle">
+  _copyHandleButton = ({ preferredUsername, serverHost }) => `<button class="copy-handle" data-handle="@${preferredUsername}@${serverHost}" title="Copy handle">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
   </button>`;
-  
+
   /**
    * Format a date string in a more readable format
    */
@@ -336,42 +336,63 @@ class GhostActivityPubEmbed extends HTMLElement {
     }
   }
 
+  async fetchEndpoint(endpoint) {
+    const url = new URL(this.getAttribute('url') || document.location.href);
+    const proxy = new URL(this.getAttribute('proxy') || url);
+
+    const proxyMode = proxy.hostname !== url.hostname;
+
+    const path = endpoint.replace(`${url.origin}/.ghost/activitypub/`, '');
+
+    const baseUrl = proxyMode ? proxy.origin : url.origin;
+
+    try {
+      const response = await fetch(`${baseUrl}/.ghost/activitypub/${path}`, {
+        headers: {
+          accept: 'application/activity+json',
+          ...(proxyMode ? { 'x-proxy': url.origin } : {})
+        }
+      });
+      if (!response.ok) {
+        return [new Error(`HTTP error! status: ${response.status}`), null];
+      }
+
+      return [null, await response.json()];
+
+    } catch (error) {
+      return [error, null];
+    }
+  }
+
   /**
    * Fetch and display feed data
    */
   async fetchFeed() {
 
     const url = new URL(this.getAttribute('url') || document.location.href);
+    const proxy = new URL(this.getAttribute('proxy') || document.location.href);
+
+    const proxyMode = proxy.hostname !== url.hostname;
 
     try {
       // Fetch the main outbox
-      const response = await fetch(`${url.origin}/.ghost/activitypub/outbox/index`, {
-        headers: {
-          accept: 'application/activity+json'
-        }
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      const [error, outboxData] = await this.fetchEndpoint('outbox/index');
+
+      if (error) {
+        throw error;
       }
 
-      const outboxData = await response.json();
-
+      console.log(outboxData);
       // Check if it has a "first" property to fetch the items
       if (!outboxData.first) {
         throw new Error('Invalid feed format: missing "first" property');
       }
 
       // Fetch the actual items from the "first" URL
-      const itemsResponse = await fetch(outboxData.first, {
-        headers: {
-          accept: 'application/activity+json'
-        }
-      });
-      if (!itemsResponse.ok) {
-        throw new Error(`HTTP error! status: ${itemsResponse.status}`);
+      const [firstError, itemsData] = await this.fetchEndpoint(outboxData.first);
+      if (firstError) {
+        throw firstError;
       }
-
-      const itemsData = await itemsResponse.json();
 
       // Check if we have items to display
       if (!itemsData.orderedItems || !Array.isArray(itemsData.orderedItems)) {
@@ -379,13 +400,12 @@ class GhostActivityPubEmbed extends HTMLElement {
       }
 
       // Fetch profile info
-      const profile = await fetch(`${url.origin}/.ghost/activitypub/users/index`)
-
-      if (!profile.ok) {
-        throw new Error(`HTTP error! status: ${profile.status}`);
+      const [profileError, profileData] = await this.fetchEndpoint('users/index');
+      if (profileError) {
+        throw profileError;
       }
 
-      this._profileData = await profile.json();
+      this._profileData = profileData;
 
       this._profileData.serverHost = url.hostname.replace('www.', '');
 

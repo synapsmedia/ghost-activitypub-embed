@@ -70,6 +70,16 @@ You can set CSS variables with code injection or in your theme's CSS file.
 </style>
 ```
 
+#### Proxy
+
+You can use a proxy to fetch the feed data. This is useful if you want to run this component on a different domain.
+
+```html
+<ghost-activitypub-embed url="https://your-ghost-blog.com" proxy="https://your-proxy.com"></ghost-activitypub-embed>
+```
+
+Proxy server should accept requests starting with `/.ghost/activitypub/` and read `x-proxy` header to get the original URL. Then should make the same request to the original URL and return the response.
+
 #### CSS Parts
 
 - `container` - The feed container
