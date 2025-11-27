@@ -1,3 +1,10 @@
+## [0.6.1](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.6.0...v0.6.1) (2025-11-27)
+
+
+### Bug Fixes
+
+* handling www subdomain and missing profile picture ([f407292](https://github.com/synapsmedia/ghost-activitypub-embed/commit/f407292afdc9f7cfd02958f97f754cb5a049def5))
+
 # [0.6.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.5.0...v0.6.0) (2025-11-27)
 
 
