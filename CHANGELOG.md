@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.3.0...v0.4.0) (2025-11-27)
+
+
+### Features
+
+* copy-handle button added ([1e8a71b](https://github.com/synapsmedia/ghost-activitypub-embed/commit/1e8a71bf1f70496b7df6af4b7d5e1a0c329e5d12))
+
 # [0.3.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.2.0...v0.3.0) (2025-11-01)
 
 
