@@ -49,7 +49,7 @@ const styles = `
 }
 .profile-image {
   width: 100%;
-  height: 300px;
+  max-height: 300px;
   object-fit: cover;
 }
 .profile-icon,
