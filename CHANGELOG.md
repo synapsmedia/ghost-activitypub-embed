@@ -1,3 +1,10 @@
+## [0.7.1](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.7.0...v0.7.1) (2025-12-02)
+
+
+### Bug Fixes
+
+* better cover image for small screens ([f4edbc3](https://github.com/synapsmedia/ghost-activitypub-embed/commit/f4edbc3d35b5aec19a034c0311b9ae10361262aa))
+
 # [0.7.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.6.1...v0.7.0) (2025-12-02)
 
 
