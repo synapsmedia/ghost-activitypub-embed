@@ -1,3 +1,10 @@
+# [0.7.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.6.1...v0.7.0) (2025-12-02)
+
+
+### Features
+
+* option to show post links in timeline ([040a428](https://github.com/synapsmedia/ghost-activitypub-embed/commit/040a42847e6a4826969fc6992ed2254d2c113dbd))
+
 ## [0.6.1](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.6.0...v0.6.1) (2025-11-27)
 
 
