@@ -8,12 +8,13 @@ const styles = `
   --padding: var(--ghap-padding, 1rem);
   --font-family: var(--ghap-font-family, var(--gh-font-body, Inter -apple-system BlinkMacSystemFont 'avenir next' avenir 'helvetica neue' helvetica ubuntu roboto noto 'segoe ui' arial sans-serif));
   --font-size: var(--ghap-font-size, 10px);
+  --border-color: var(--ghap-border-color, rgb(229, 233, 235));
 
   font-family: var(--font-family);
   font-size: var(--font-size);
   max-width: 100%;
   border-radius: var(--ghap-border-radius, 10px);
-  border-color: var(--ghap-border-color, rgb(229, 233, 235));
+  border-color: var(--border-color);
   border-style: solid;
   border-width: var(--ghap-border-width, 1px);
   overflow: hidden;
@@ -24,7 +25,7 @@ const styles = `
   padding: 0;
 }
 .profile-header {
-  border-bottom: 1px solid var(--ghap-border-color, rgb(229, 233, 235));
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: var(--padding);
 }
 .profile-info-header {
@@ -127,9 +128,8 @@ const styles = `
   --icon-size: var(--ghap-feed-item-icon-size, 40px);
   display: flex;
   flex-direction: column;
-  margin-bottom: 1rem;
   padding: var(--ghap-feed-vertical-gap, 1rem);
-  border-bottom: 1px solid var(--ghap-border-color, rgb(229, 233, 235));
+  border-bottom: 1px solid var(--border-color);
 }
 .feed-item:last-child {
   border-bottom: none;
@@ -164,6 +164,25 @@ const styles = `
   padding-left: calc(var(--icon-size) + 1em);
   font-size: 1.4em;
   color: rgb(57, 64, 71);
+}
+.feed-item-article-preview {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  padding: 1rem;
+  border: solid 1px var(--border-color);
+  border-radius: 7px;
+}
+.feed-item-article-preview:hover {
+  background-color: var(--border-color);
+}
+.feed-item-article-preview h3 {
+  margin: 0 0 0.5em 0;
+  font-size: 1.2em;
+}
+.feed-item-article-preview p {
+  margin: 0;
+  color: rgb(124 139 154);
 }
 .feed-item-date {
   color: rgb(124 139 154);
@@ -261,7 +280,7 @@ class GhostActivityPubEmbed extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['url', 'proxy'];
+    return ['url', 'proxy', 'include-posts'];
   }
 
   _profileData = null;
@@ -307,7 +326,7 @@ class GhostActivityPubEmbed extends HTMLElement {
    */
   renderItem(item, profileData) {
     // Check if it's a Create activity with a Note
-    if (item.type === 'Create' && item.object && item.object.type === 'Note') {
+    if (item.type === 'Create' && item.object && (item.object.type === 'Note' || this.hasAttribute('include-posts') && item.object.type === 'Article')) {
       const note = item.object;
       const published = note.published;
       let attachment = '';
@@ -329,7 +348,10 @@ class GhostActivityPubEmbed extends HTMLElement {
               </div>
             </div>
             <div class="feed-item-content" part="feed-item-content">
-              ${note.content}
+              ${note.type === 'Note' ? note.content : `<a href="${note.url}" target="_top" class="feed-item-article-preview">
+                <h3>${note.name}</h3>
+                <p>${note.summary || ''}</p>
+              </a>`}
               ${attachment}
             </div>
           </div>
@@ -374,35 +396,8 @@ class GhostActivityPubEmbed extends HTMLElement {
   async fetchFeed() {
 
     const url = new URL(this.getAttribute('url') || document.location.href);
-    const proxy = new URL(this.getAttribute('proxy') || document.location.href);
-
-    const proxyMode = proxy.hostname !== url.hostname;
 
     try {
-      // Fetch the main outbox
-      const [error, outboxData] = await this.fetchEndpoint('outbox/index');
-
-      if (error) {
-        throw error;
-      }
-
-      console.log(outboxData);
-      // Check if it has a "first" property to fetch the items
-      if (!outboxData.first) {
-        throw new Error('Invalid feed format: missing "first" property');
-      }
-
-      // Fetch the actual items from the "first" URL
-      const [firstError, itemsData] = await this.fetchEndpoint(outboxData.first);
-      if (firstError) {
-        throw firstError;
-      }
-
-      // Check if we have items to display
-      if (!itemsData.orderedItems || !Array.isArray(itemsData.orderedItems)) {
-        throw new Error('Invalid feed format: missing "orderedItems" array');
-      }
-
       // Fetch profile info
       const [profileError, profileData] = await this.fetchEndpoint('users/index');
       if (profileError) {
@@ -415,13 +410,39 @@ class GhostActivityPubEmbed extends HTMLElement {
 
       const profileHeaderHTML = this.renderProfileHeader(this._profileData);
 
-      // Get the first 10 items
-      const items = itemsData.orderedItems.slice(0, 10);
+      let items = [];
+      // Fetch the main outbox
+      const [error, outboxData] = await this.fetchEndpoint('outbox/index');
+
+      if (error) {
+        throw error;
+      }
+
+      if (outboxData.totalItems > 0) {
+        // Check if it has a "first" property to fetch the items
+        if (!outboxData.first) {
+          throw new Error('Invalid feed format: missing "first" property');
+        }
+
+        // Fetch the actual items from the "first" URL
+        const [firstError, itemsData] = await this.fetchEndpoint(outboxData.first);
+        if (firstError) {
+          throw firstError;
+        }
+
+        // Check if we have items to display
+        if (!itemsData.orderedItems || !Array.isArray(itemsData.orderedItems)) {
+          throw new Error('Invalid feed format: missing "orderedItems" array');
+        }
+
+        // Get the first 10 items
+        items = itemsData.orderedItems?.slice(0, 10) || [];
+      }
 
       // Render the feed items
       let html = '';
       if (items.length === 0) {
-        html = '<div class="feed-item">No items in feed</div>';
+        html = '';
       } else {
         items.forEach(item => {
           html += this.renderItem(item, this._profileData);
