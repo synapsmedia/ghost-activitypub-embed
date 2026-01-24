@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+permissions:
+  contents: read
 
 jobs:
   release:
@@ -25,6 +27,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signatures
 
       - name: Release
         env:
