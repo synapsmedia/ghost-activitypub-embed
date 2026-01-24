@@ -368,7 +368,7 @@ class GhostActivityPubEmbed extends HTMLElement {
 
     const proxyMode = proxy.hostname !== url.hostname;
 
-    const path = endpoint.replace('www.', '').replace(`${url.origin}/.ghost/activitypub/`, '');
+    const path = endpoint.replace(`${url.origin}/.ghost/activitypub/`, '');
     
     const baseUrl = proxyMode ? proxy.origin : url.origin;
 
