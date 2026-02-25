@@ -363,7 +363,8 @@ class GhostActivityPubEmbed extends HTMLElement {
   }
 
   async fetchEndpoint(endpoint) {
-    const url = new URL(this.getAttribute('url') || document.location.href);
+    const isAbsoluteUrl = endpoint.startsWith('http://') || endpoint.startsWith('https://');
+    const url = new URL(isAbsoluteUrl ? endpoint : (this.getAttribute('url') || document.location.href));
     const proxy = new URL(this.getAttribute('proxy') || url);
 
     const proxyMode = proxy.hostname !== url.hostname;
