@@ -1,3 +1,11 @@
+## [0.7.2](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.7.1...v0.7.2) (2026-02-25)
+
+
+### Bug Fixes
+
+* don't remove www from endpoint urls ([a47f2c3](https://github.com/synapsmedia/ghost-activitypub-embed/commit/a47f2c3e9ca79d5d12f9ad5bbff4cd3ea1bcfb35))
+* fetchEndpoint should work with absolute urls ([c0c25a9](https://github.com/synapsmedia/ghost-activitypub-embed/commit/c0c25a94dce472dbb737a345f76d0be267d8eaea))
+
 ## [0.7.1](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.7.0...v0.7.1) (2025-12-02)
 
 
