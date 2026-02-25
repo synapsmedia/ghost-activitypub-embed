@@ -35,3 +35,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
+
+      - name: Purge jsDelivr cache
+        uses: gacts/purge-jsdelivr-cache@v1
+        with:
+          url: |
+            https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-activitypub-embed@latest/ghap-embed.js
+            https://cdn.jsdelivr.net/npm/@synapsmedia/ghost-activitypub-embed@latest/ghap-embed.min.js
