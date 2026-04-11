@@ -340,7 +340,7 @@ class GhostActivityPubEmbed extends HTMLElement {
           <div class="feed-item" part="feed-item">
             <div class="feed-author" part="feed-author">
               <div class="feed-author-avatar" part="feed-author-avatar">
-                <img src="${profileData.icon.url}">
+                ${ profileData.icon?.url ? `<img src="${profileData.icon.url}">` : '<div class="profile-icon-placeholder"></div>' }
               </div>
               <div class="feed-author-meta" part="feed-author-meta">
                 <div class="feed-author-name">${profileData.name}</div>
