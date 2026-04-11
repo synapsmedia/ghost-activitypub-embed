@@ -1,3 +1,10 @@
+## [0.7.5](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.7.4...v0.7.5) (2026-04-11)
+
+
+### Bug Fixes
+
+* avatar placeholder variable location ([bb79dec](https://github.com/synapsmedia/ghost-activitypub-embed/commit/bb79decf220b1c68360c7f73f7478ed1b7223eee))
+
 ## [0.7.4](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.7.3...v0.7.4) (2026-04-11)
 
 
