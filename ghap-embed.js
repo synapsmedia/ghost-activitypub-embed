@@ -52,8 +52,7 @@ const styles = `
   max-height: 300px;
   object-fit: cover;
 }
-.profile-icon,
-.profile-icon-placeholder {
+.profile-icon {
   --icon-size: var(--profile-icon-size, 90px);
   --icon-border-size: var(--profile-icon-border-size, 5px);
   width: var(--icon-size);
@@ -303,12 +302,13 @@ class GhostActivityPubEmbed extends HTMLElement {
   }
 
   renderProfileHeader(profileData) {
+    const avatarPlaceholder = 'https://static.ghost.org/v5.0.0/images/orb-email-head-static.png';
     return `
         <div class="profile-header" part="header">
           ${ profileData.image?.url ? `<img class="profile-image" src="${profileData.image.url}">` : '<div class="profile-image-placeholder"></div>' }
           <div class="profile-info">
             <div class="profile-info-header">
-              ${ profileData.icon?.url ? `<img class="profile-icon" src="${profileData.icon.url}">` : '<div class="profile-icon-placeholder"></div>' }
+              <img class="profile-icon" src="${profileData.icon?.url || avatarPlaceholder}">
               <button class="ghap-follow-button">Follow</button>
             </div>
             <h2 class="profile-name">${profileData.name}</h2>
@@ -340,7 +340,7 @@ class GhostActivityPubEmbed extends HTMLElement {
           <div class="feed-item" part="feed-item">
             <div class="feed-author" part="feed-author">
               <div class="feed-author-avatar" part="feed-author-avatar">
-                ${ profileData.icon?.url ? `<img src="${profileData.icon.url}">` : '<div class="profile-icon-placeholder"></div>' }
+                <img src="${profileData.icon?.url || avatarPlaceholder}">
               </div>
               <div class="feed-author-meta" part="feed-author-meta">
                 <div class="feed-author-name">${profileData.name}</div>
