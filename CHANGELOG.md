@@ -1,3 +1,10 @@
+## [0.7.3](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.7.2...v0.7.3) (2026-04-11)
+
+
+### Bug Fixes
+
+* guard lack of profile icon ([0c047fc](https://github.com/synapsmedia/ghost-activitypub-embed/commit/0c047fc239ed26c79ea3c9ced7b42a723e688677))
+
 ## [0.7.2](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.7.1...v0.7.2) (2026-02-25)
 
 
