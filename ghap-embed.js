@@ -261,6 +261,7 @@ dialog .feed-item-image {
   display: inline-flex;
 }
 `
+const avatarPlaceholder = 'https://static.ghost.org/v5.0.0/images/orb-email-head-static.png';
 
 class GhostActivityPubEmbed extends HTMLElement {
   constructor() {
@@ -302,7 +303,6 @@ class GhostActivityPubEmbed extends HTMLElement {
   }
 
   renderProfileHeader(profileData) {
-    const avatarPlaceholder = 'https://static.ghost.org/v5.0.0/images/orb-email-head-static.png';
     return `
         <div class="profile-header" part="header">
           ${ profileData.image?.url ? `<img class="profile-image" src="${profileData.image.url}">` : '<div class="profile-image-placeholder"></div>' }
