@@ -1,3 +1,10 @@
+## [0.7.4](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.7.3...v0.7.4) (2026-04-11)
+
+
+### Bug Fixes
+
+* use ghost logo as avatar placeholder ([b76aba4](https://github.com/synapsmedia/ghost-activitypub-embed/commit/b76aba4a8eb1f822f72b5a57b08d814ed1d802bd))
+
 ## [0.7.3](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.7.2...v0.7.3) (2026-04-11)
 
 
