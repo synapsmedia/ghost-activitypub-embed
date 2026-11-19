@@ -1,3 +1,10 @@
+# [0.8.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.7.5...v0.8.0) (2026-11-19)
+
+
+### Features
+
+* show a single post with the post attribute ([4bf2906](https://github.com/synapsmedia/ghost-activitypub-embed/commit/4bf2906c4cd585b737ece636f68cebfba37754f4))
+
 ## [0.7.5](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.7.4...v0.7.5) (2026-04-11)
 
 
