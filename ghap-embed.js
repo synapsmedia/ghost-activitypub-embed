@@ -77,6 +77,48 @@ const styles = `
   display: flex;
   gap: 5px;
 }
+.profile-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-inline: var(--padding);
+  margin-top: 0.75rem;
+  font-size: 1.4em;
+}
+.profile-link,
+.profile-subscribe {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  text-decoration: none;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.profile-link {
+  background-color: rgba(21, 23, 26, 0.06);
+  color: var(--text-color);
+}
+.profile-link:hover {
+  background-color: rgba(21, 23, 26, 0.1);
+}
+.profile-link img {
+  width: 1.2em;
+  height: 1.2em;
+  border-radius: 50%;
+}
+.profile-subscribe {
+  background-color: var(--accent-color, #15171a);
+  color: #fff;
+}
+.profile-subscribe svg {
+  width: 1.1em;
+  height: 1.1em;
+}
+.profile-subscribe:hover {
+  filter: brightness(1.1);
+}
 .profile-username a {
   color: var(--ghap-text-color);
   text-decoration: none;
@@ -187,6 +229,63 @@ const styles = `
   color: rgb(124 139 154);
   font-size: 1.3em;
 }
+.feed-item-parent {
+  --icon-size: var(--ghap-thread-parent-icon-size, 32px);
+  position: relative;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.feed-item-parent .feed-author-name {
+  font-size: 1.3em;
+}
+.feed-item-parent .feed-author-username {
+  font-size: 1.2em;
+}
+.feed-item-parent .feed-item-content {
+  font-size: 1.3em;
+}
+.feed-item-main {
+  --icon-size: var(--ghap-thread-main-icon-size, 48px);
+  background-color: var(--ghap-highlight-color, rgb(239, 246, 255));
+}
+.feed-item-main .feed-item-content {
+  font-size: 1.6em;
+}
+.feed-item-parent::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--ghap-feed-vertical-gap, 1rem) + var(--icon-size) / 2 - 1px);
+  top: calc(var(--ghap-feed-vertical-gap, 1rem) + var(--icon-size) + 4px);
+  bottom: 0.5rem;
+  width: 2px;
+  background-color: var(--border-color);
+}
+.feed-item-parent .feed-item-content {
+  margin-bottom: 1rem;
+}
+.thread-earlier,
+.thread-missing {
+  display: block;
+  padding: var(--ghap-feed-vertical-gap, 1rem) var(--ghap-feed-vertical-gap, 1rem) 0;
+  font-size: 1.3em;
+  color: rgb(124 139 154);
+}
+.thread-earlier:hover {
+  color: rgb(21, 23, 26);
+}
+.feed-author-date a {
+  color: inherit;
+  text-decoration: none;
+}
+.feed-author-date a:hover {
+  text-decoration: underline;
+}
+.feed-item-content .invisible {
+  display: none;
+}
+.feed-item-content .ellipsis::after {
+  content: '…';
+}
 .feed-item .feed-item-image {
   max-width: 100%;
   max-height: 200px;
@@ -263,6 +362,87 @@ dialog .feed-item-image {
 `
 const avatarPlaceholder = 'https://static.ghost.org/v5.0.0/images/orb-email-head-static.png';
 
+/**
+ * Text for HTML, and URLs for attributes (http and https only)
+ */
+const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+}[c]));
+
+const safeUrl = (value) => {
+  if (!value || typeof value !== 'string') {
+    return '';
+  }
+  try {
+    const url = new URL(value, document.baseURI);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+  } catch {
+    return '';
+  }
+};
+
+/**
+ * Post and profile HTML comes from other servers: keep text formatting and links only
+ */
+const ALLOWED_TAGS = ['A', 'B', 'BLOCKQUOTE', 'BR', 'CODE', 'DEL', 'EM', 'I', 'LI', 'OL', 'P', 'PRE', 'S', 'SPAN', 'STRONG', 'U', 'UL'];
+const DROPPED_TAGS = ['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'FORM', 'INPUT', 'BUTTON', 'TEXTAREA', 'SELECT', 'LINK', 'META', 'BASE', 'SVG', 'MATH', 'TEMPLATE', 'NOSCRIPT'];
+
+const sanitizeHtml = (html) => {
+  const template = document.createElement('template');
+  template.innerHTML = String(html ?? '');
+
+  // Deepest first, so unwrapping an element never skips its children
+  for (const el of Array.from(template.content.querySelectorAll('*')).reverse()) {
+    const tag = el.tagName.toUpperCase();
+    if (DROPPED_TAGS.includes(tag)) {
+      el.remove();
+      continue;
+    }
+    if (!ALLOWED_TAGS.includes(tag)) {
+      el.replaceWith(...el.childNodes);
+      continue;
+    }
+
+    const href = tag === 'A' ? safeUrl(el.getAttribute('href')) : '';
+    const className = tag === 'SPAN' ? el.getAttribute('class') : null;
+    for (const attr of Array.from(el.attributes)) {
+      el.removeAttribute(attr.name);
+    }
+    if (className) {
+      el.setAttribute('class', className);
+    }
+    if (tag === 'A') {
+      if (href) {
+        el.setAttribute('href', href);
+        el.setAttribute('target', '_blank');
+        el.setAttribute('rel', 'nofollow noopener noreferrer');
+      } else {
+        el.replaceWith(...el.childNodes);
+      }
+    }
+  }
+
+  return template.innerHTML;
+};
+
+// "@user@domain" or "user@domain"
+const parseHandle = (value) => {
+  const match = String(value || '').trim().replace(/^@/, '').match(/^([^@\/\s]+)@([^@\/\s]+)$/);
+  return match ? { username: match[1], domain: match[2] } : null;
+};
+
+const firstUrl = (value) => [].concat(value || [])
+  .map((u) => typeof u === 'string' ? u : u?.href)
+  .find(Boolean) || '';
+
+const hostOf = (url) => {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+};
+
 class GhostActivityPubEmbed extends HTMLElement {
   constructor() {
     super();
@@ -284,8 +464,26 @@ class GhostActivityPubEmbed extends HTMLElement {
   }
 
   _profileData = null;
+  _parent = null;
 
-  _copyHandleButton = ({ preferredUsername, serverHost }) => `<button class="copy-handle" data-handle="@${preferredUsername}@${serverHost}" title="Copy handle">
+  /**
+   * The post a single `post` is replying to, shown above it. Set by the page that
+   * resolved it: { object, author, link }, where `object` is the ActivityPub object
+   * (null when it couldn't be loaded), `author` its actor (or null) and `link`
+   * where it opens.
+   */
+  get parent() {
+    return this._parent;
+  }
+
+  set parent(value) {
+    this._parent = value || null;
+    if (this.isConnected) {
+      this.fetchFeed();
+    }
+  }
+
+  _copyHandleButton = ({ preferredUsername, serverHost }) => `<button class="copy-handle" data-handle="@${escapeHtml(preferredUsername)}@${escapeHtml(serverHost)}" title="Copy handle">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-copy" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
   </button>`;
@@ -293,31 +491,99 @@ class GhostActivityPubEmbed extends HTMLElement {
   /**
    * Format a date string in a more readable format
    */
-  formatDate(dateStr) {
+  formatDate(dateStr, full = false) {
     const date = new Date(dateStr);
-    return new Intl.DateTimeFormat('en-US', {
-      // year: 'numeric',
+    return new Intl.DateTimeFormat('en-US', full ? {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    } : {
       month: 'short',
       day: 'numeric',
     }).format(date);
   }
 
-  renderProfileHeader(profileData) {
+  /**
+   * With `site-links`: the profile's website and, when the Ghost site takes sign-ups,
+   * a Subscribe link to its Portal. Ghost's public site info allows any origin.
+   */
+  async fetchSiteLinks(profileData) {
+    if (!this.hasAttribute('site-links')) {
+      return null;
+    }
+
+    const website = safeUrl(firstUrl(profileData.url)) || safeUrl(`https://${profileData.serverHost}/`);
+    if (!website) {
+      return null;
+    }
+
+    let site = null;
+    try {
+      const response = await fetch(new URL('members/api/site/', website), {
+        signal: AbortSignal.timeout(3000),
+      });
+      if (response.ok) {
+        site = (await response.json())?.site || null;
+      }
+    } catch {
+      // the website link alone
+    }
+
+    // Same rule as Ghost's recommendations: sign-up open, no terms checkbox to tick
+    let subscribe = '';
+    if (site?.allow_external_signup === true) {
+      const signup = new URL(website);
+      signup.searchParams.set('ref', document.location.hostname);
+      signup.hash = '#/portal/signup';
+      subscribe = signup.href;
+    }
+
+    return {
+      website,
+      subscribe,
+      // Ghost's icon setting, else the site's favicon (hidden if there's none)
+      icon: safeUrl(site?.icon) || new URL('/favicon.ico', website).href,
+      accentColor: /^#[0-9a-f]{3,8}$/i.test(site?.accent_color || '') ? site.accent_color : '',
+    };
+  }
+
+  renderSiteLinks(links) {
+    if (!links) {
+      return '';
+    }
+
+    const host = hostOf(links.website);
+    return `
+            <div class="profile-links" part="profile-links">
+              <a class="profile-link" href="${escapeHtml(links.website)}" target="_blank" rel="noopener">
+                ${links.icon ? `<img src="${escapeHtml(links.icon)}" alt="" onerror="this.remove()">` : ''}${escapeHtml(host)} ↗
+              </a>
+              ${links.subscribe ? `<a class="profile-subscribe" href="${escapeHtml(links.subscribe)}" target="_blank" rel="noopener"${links.accentColor ? ` style="--accent-color: ${links.accentColor}"` : ''}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                Subscribe ↗
+              </a>` : ''}
+            </div>`;
+  }
+
+  renderProfileHeader(profileData, links = null) {
     return `
         <div class="profile-header" part="header">
-          ${ profileData.image?.url ? `<img class="profile-image" src="${profileData.image.url}">` : '<div class="profile-image-placeholder"></div>' }
+          ${ safeUrl(profileData.image?.url) ? `<img class="profile-image" src="${escapeHtml(safeUrl(profileData.image.url))}">` : '<div class="profile-image-placeholder"></div>' }
           <div class="profile-info">
             <div class="profile-info-header">
-              <img class="profile-icon" src="${profileData.icon?.url || avatarPlaceholder}">
+              <img class="profile-icon" src="${escapeHtml(safeUrl(profileData.icon?.url) || avatarPlaceholder)}">
               <button class="ghap-follow-button">Follow</button>
             </div>
-            <h2 class="profile-name">${profileData.name}</h2>
+            <h2 class="profile-name">${escapeHtml(profileData.name)}</h2>
             <p class="profile-username">
-              <a href="https://${profileData.serverHost}" target="_blank">@${profileData.preferredUsername}@${profileData.serverHost}</a>
+              <a href="https://${escapeHtml(profileData.serverHost)}" target="_blank">@${escapeHtml(profileData.preferredUsername)}@${escapeHtml(profileData.serverHost)}</a>
               ${this._copyHandleButton(profileData)}
               <span class="copy-handle-success">Copied!</span>
             </p>
-            <p class="profile-description">${profileData.summary}</p>
+            <p class="profile-description">${sanitizeHtml(profileData.summary)}</p>
+            ${this.renderSiteLinks(links)}
           </div>
         </div>`;
   }
@@ -329,40 +595,84 @@ class GhostActivityPubEmbed extends HTMLElement {
     const includePosts = this.hasAttribute('include-posts') || this.hasAttribute('post');
     // Check if it's a Create activity with a Note
     if (item.type === 'Create' && item.object && (item.object.type === 'Note' || includePosts && item.object.type === 'Article')) {
-      const note = item.object;
-      const published = note.published;
+      if (this.hasAttribute('post')) {
+        return this.renderPost(item.object, profileData, {
+          className: this._parent ? 'feed-item-main' : '',
+          fullDate: true,
+        });
+      }
+      return this.renderPost(item.object, profileData);
+    }
+    return '';
+  }
 
-      // Handle attachments (images); a note with several images has an array
-      const attachments = [].concat(note.attachment || []);
-      const attachment = attachments
-        .filter((a) => a && a.type === 'Image' && a.url)
-        .map((a) => `<img class="feed-item-image" src="${a.url}" alt="Attached image">`)
-        .join('');
+  /**
+   * A note, or an article as a preview card. `link` makes the date a link to the post.
+   */
+  renderPost(note, profileData, { className = '', link = '', fullDate = false } = {}) {
+    // Handle attachments (images); a note with several images has an array
+    const attachment = [].concat(note.attachment || [])
+      .filter((a) => a && a.type === 'Image' && safeUrl(a.url))
+      .map((a) => `<img class="feed-item-image" src="${escapeHtml(safeUrl(a.url))}" alt="${escapeHtml(a.name || 'Attached image')}">`)
+      .join('');
 
-      return `
-          <div class="feed-item" part="feed-item">
-            <div class="feed-author" part="feed-author">
-              <div class="feed-author-avatar" part="feed-author-avatar">
-                <img src="${profileData.icon?.url || avatarPlaceholder}">
-              </div>
-              <div class="feed-author-meta" part="feed-author-meta">
-                <div class="feed-author-name">${profileData.name}</div>
-                <div class="feed-author-username">@${profileData.preferredUsername}@${profileData.serverHost} · <span class="feed-author-date">${this.formatDate(published)}</span></div>
-              </div>
+    const date = escapeHtml(note.published ? this.formatDate(note.published, fullDate) : '');
+    const dateLink = safeUrl(link);
+    const articleUrl = [].concat(note.url || [])
+      .map((u) => safeUrl(typeof u === 'string' ? u : u?.href))
+      .find(Boolean) || '';
+
+    return `
+        <div class="feed-item ${className}" part="feed-item">
+          <div class="feed-author" part="feed-author">
+            <div class="feed-author-avatar" part="feed-author-avatar">
+              <img src="${escapeHtml(safeUrl(profileData.icon?.url) || avatarPlaceholder)}">
             </div>
-            <div class="feed-item-content" part="feed-item-content">
-              ${note.type === 'Note' ? note.content : `<a href="${note.url}" target="_top" class="feed-item-article-preview">
-                <h3>${note.name}</h3>
-                <p>${note.summary || ''}</p>
-              </a>`}
-              ${attachment}
+            <div class="feed-author-meta" part="feed-author-meta">
+              <div class="feed-author-name">${escapeHtml(profileData.name || profileData.preferredUsername)}</div>
+              <div class="feed-author-username">@${escapeHtml(profileData.preferredUsername)}@${escapeHtml(profileData.serverHost)} · <span class="feed-author-date">${dateLink ? `<a href="${escapeHtml(dateLink)}" target="_top">${date}</a>` : date}</span></div>
             </div>
           </div>
-        `;
+          <div class="feed-item-content" part="feed-item-content">
+            ${note.type === 'Article' ? `<a href="${escapeHtml(articleUrl)}" target="_top" class="feed-item-article-preview">
+              <h3>${escapeHtml(note.name)}</h3>
+              <p>${escapeHtml(note.summary || '')}</p>
+            </a>` : sanitizeHtml(note.content)}
+            ${attachment}
+          </div>
+        </div>
+      `;
+  }
+
+  /**
+   * The post a single post replies to, joined to it by a thread line
+   */
+  renderParent({ object, author, handle, link } = {}) {
+    const href = escapeHtml(safeUrl(link));
+
+    if (!object || !['Note', 'Article'].includes(object.type)) {
+      return href
+        ? `<a class="thread-missing" href="${href}" target="_top" part="thread-missing">Replying to a post that couldn't be loaded</a>`
+        : '';
     }
-    else {
-      return ``;
-    }
+
+    const attributedTo = [].concat(object.attributedTo || [])
+      .map((a) => typeof a === 'string' ? a : a?.id)
+      .find(Boolean) || '';
+    const actorId = author?.id || attributedTo;
+    const knownHandle = parseHandle(handle);
+    const profile = {
+      ...author,
+      preferredUsername: knownHandle?.username || author?.preferredUsername || actorId.split('/').filter(Boolean).pop() || '',
+      serverHost: knownHandle?.domain || hostOf(actorId),
+    };
+
+    // The parent replies to something too: its own page continues the thread
+    const earlier = object.inReplyTo && href
+      ? `<a class="thread-earlier" href="${href}" target="_top" part="thread-earlier">Show earlier replies</a>`
+      : '';
+
+    return earlier + this.renderPost(object, profile, { className: 'feed-item-parent', link });
   }
 
   async fetchEndpoint(endpoint) {
@@ -412,7 +722,14 @@ class GhostActivityPubEmbed extends HTMLElement {
 
       this._profileData.serverHost = url.hostname.replace('www.', '');
 
-      const profileHeaderHTML = this.renderProfileHeader(this._profileData);
+      // The handle can be on another domain than the site (custom social web domains)
+      const handle = parseHandle(this.getAttribute('handle'));
+      if (handle) {
+        this._profileData.preferredUsername = handle.username;
+        this._profileData.serverHost = handle.domain;
+      }
+
+      const siteLinks = this.fetchSiteLinks(this._profileData);
 
       let items = [];
       const post = this.getAttribute('post');
@@ -455,18 +772,19 @@ class GhostActivityPubEmbed extends HTMLElement {
       }
 
       // Render the feed items
-      let html = '';
-      if (items.length === 0) {
-        html = '';
-      } else {
-        items.forEach(item => {
-          html += this.renderItem(item, this._profileData);
-        });
-      }
+      let html = post && this._parent ? this.renderParent(this._parent) : '';
+      items.forEach(item => {
+        html += this.renderItem(item, this._profileData);
+      });
 
       const attachmentModal = `<dialog><button class="close-dialog"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button><div class="dialog-content"></div></dialog>`;
 
-      this.shadowRoot.querySelector('.feed-container').innerHTML = `${attachmentModal}${profileHeaderHTML}${html}`;
+      const profileHeaderHTML = this.renderProfileHeader(this._profileData, await siteLinks);
+
+      // The page can put its own content (e.g. tabs) under the profile header
+      const afterHeader = '<slot name="after-header"></slot>';
+
+      this.shadowRoot.querySelector('.feed-container').innerHTML = `${attachmentModal}${profileHeaderHTML}${afterHeader}${html}`;
 
     } catch (error) {
       console.error('Error fetching feed:', error);
@@ -524,7 +842,7 @@ class GhostActivityPubEmbed extends HTMLElement {
 
           <div class="profile-username-container">
             <div class="profile-username">
-              <pre>@${this._profileData.preferredUsername}@${this._profileData.serverHost}</pre>
+              <pre>@${escapeHtml(this._profileData.preferredUsername)}@${escapeHtml(this._profileData.serverHost)}</pre>
               ${this._copyHandleButton(this._profileData)}
             </div>
           </div>

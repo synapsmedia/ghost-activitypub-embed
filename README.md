@@ -35,7 +35,19 @@ You can use a Ghost HTNL Card to embed the component or edit your theme directly
 - `url` - The base URL of your Ghost blog with ActivityPub enabled. By default it's the domain of your current page.
 - `include-posts` - Include posts in the feed (default `false`)
 - `proxy` - Proxy URL to fetch the feed data through (optional)
+- `site-links` - Show a link to the profile's website, and a Subscribe button when the Ghost site takes sign-ups (opens its Portal sign-up) (default `false`)
+- `handle` - The profile's handle, like `@john@onolan.org`, when it's on another domain than the site (Ghost's custom social web domains). By default the handle is shown on the site's domain
 - `post` - Show a single post under the profile header, not the feed. An ActivityPub object path like `note/<id>` or `article/<id>`, or the object's full URL (optional)
+
+### Properties
+
+- `parent` - With `post`, the post it replies to, shown above it with a thread line: `{ object, author, handle, link }`. `object` is the parent's ActivityPub object (`null` when it couldn't be loaded), `author` its actor (or `null`), `handle` the author's handle when known (e.g. `john@onolan.org`), and `link` where the parent opens. The component doesn't fetch it: parents are often on other servers (e.g. Mastodon) that need a server to fetch them. Set it before adding the element to the page.
+
+Post and profile HTML from the fetched objects is sanitized: only text formatting and http(s) links are kept.
+
+### Slots
+
+- `after-header` - Content placed under the profile header, above the posts. For example tabs; hide the posts with `ghost-activitypub-embed::part(feed-item) { display: none; }` while another tab is open.
 
 ### Styling
 
@@ -53,6 +65,9 @@ This component is isolated from theme styles. That means it will work in any the
 - `--ghap-font-size` - The font size of the feed container (default `10px`)
 - `--ghap-border-radius` - The border radius of the feed container (default `10px`)
 - `--ghap-border-width` - The border width of the feed container (default `1px`)
+- `--ghap-highlight-color` - The background of a single post shown under the post it replies to (default `rgb(239, 246, 255)`)
+- `--ghap-thread-parent-icon-size` - The avatar size of the post replied to (default `32px`)
+- `--ghap-thread-main-icon-size` - The avatar size of a single post shown under the post it replies to (default `48px`)
 
 You can set CSS variables with code injection or in your theme's CSS file.
 
