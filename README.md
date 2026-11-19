@@ -35,6 +35,7 @@ You can use a Ghost HTNL Card to embed the component or edit your theme directly
 - `url` - The base URL of your Ghost blog with ActivityPub enabled. By default it's the domain of your current page.
 - `include-posts` - Include posts in the feed (default `false`)
 - `proxy` - Proxy URL to fetch the feed data through (optional)
+- `post` - Show a single post under the profile header, not the feed. An ActivityPub object path like `note/<id>` or `article/<id>`, or the object's full URL (optional)
 
 ### Styling
 

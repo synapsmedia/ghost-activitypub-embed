@@ -280,7 +280,7 @@ class GhostActivityPubEmbed extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['url', 'proxy', 'include-posts'];
+    return ['url', 'proxy', 'include-posts', 'post'];
   }
 
   _profileData = null;
@@ -325,16 +325,19 @@ class GhostActivityPubEmbed extends HTMLElement {
    * Format the feed item content based on its type
    */
   renderItem(item, profileData) {
+    // A single post is shown whatever its type; the feed shows articles only with include-posts
+    const includePosts = this.hasAttribute('include-posts') || this.hasAttribute('post');
     // Check if it's a Create activity with a Note
-    if (item.type === 'Create' && item.object && (item.object.type === 'Note' || this.hasAttribute('include-posts') && item.object.type === 'Article')) {
+    if (item.type === 'Create' && item.object && (item.object.type === 'Note' || includePosts && item.object.type === 'Article')) {
       const note = item.object;
       const published = note.published;
-      let attachment = '';
 
-      // Handle attachments (images)
-      if (note.attachment && note.attachment.type === 'Image') {
-        attachment = `<img class="feed-item-image" src="${note.attachment.url}" alt="Attached image">`;
-      }
+      // Handle attachments (images); a note with several images has an array
+      const attachments = [].concat(note.attachment || []);
+      const attachment = attachments
+        .filter((a) => a && a.type === 'Image' && a.url)
+        .map((a) => `<img class="feed-item-image" src="${a.url}" alt="Attached image">`)
+        .join('');
 
       return `
           <div class="feed-item" part="feed-item">
@@ -412,32 +415,43 @@ class GhostActivityPubEmbed extends HTMLElement {
       const profileHeaderHTML = this.renderProfileHeader(this._profileData);
 
       let items = [];
-      // Fetch the main outbox
-      const [error, outboxData] = await this.fetchEndpoint('outbox/index');
+      const post = this.getAttribute('post');
 
-      if (error) {
-        throw error;
-      }
+      if (post) {
+        // A single post: an object path like `note/<id>` or `article/<id>`, or its full URL
+        const [postError, postData] = await this.fetchEndpoint(post);
+        if (postError) {
+          throw postError;
+        }
+        items = [{ type: 'Create', object: postData }];
+      } else {
+        // Fetch the main outbox
+        const [error, outboxData] = await this.fetchEndpoint('outbox/index');
 
-      if (outboxData.totalItems > 0) {
-        // Check if it has a "first" property to fetch the items
-        if (!outboxData.first) {
-          throw new Error('Invalid feed format: missing "first" property');
+        if (error) {
+          throw error;
         }
 
-        // Fetch the actual items from the "first" URL
-        const [firstError, itemsData] = await this.fetchEndpoint(outboxData.first);
-        if (firstError) {
-          throw firstError;
-        }
+        if (outboxData.totalItems > 0) {
+          // Check if it has a "first" property to fetch the items
+          if (!outboxData.first) {
+            throw new Error('Invalid feed format: missing "first" property');
+          }
 
-        // Check if we have items to display
-        if (!itemsData.orderedItems || !Array.isArray(itemsData.orderedItems)) {
-          throw new Error('Invalid feed format: missing "orderedItems" array');
-        }
+          // Fetch the actual items from the "first" URL
+          const [firstError, itemsData] = await this.fetchEndpoint(outboxData.first);
+          if (firstError) {
+            throw firstError;
+          }
 
-        // Get the first 10 items
-        items = itemsData.orderedItems?.slice(0, 10) || [];
+          // Check if we have items to display
+          if (!itemsData.orderedItems || !Array.isArray(itemsData.orderedItems)) {
+            throw new Error('Invalid feed format: missing "orderedItems" array');
+          }
+
+          // Get the first 10 items
+          items = itemsData.orderedItems?.slice(0, 10) || [];
+        }
       }
 
       // Render the feed items
@@ -522,7 +536,8 @@ class GhostActivityPubEmbed extends HTMLElement {
   }
 
   attributeChangedCallback(name, oldValue, newValue) {
-    if (name === 'url' && oldValue !== newValue) {
+    // Before it's connected, connectedCallback does the first fetch with all attributes set
+    if ((name === 'url' || name === 'post') && oldValue !== newValue && this.isConnected) {
       this.fetchFeed();
     }
   }
