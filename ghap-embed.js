@@ -36,13 +36,27 @@ const styles = `
 }
 
 .profile-info-header .ghap-follow-button {
+  display: inline-flex;
+  align-items: center;
+  height: 2.3em;
   border: none;
-  padding: 10px 16px;
+  padding: 0 14px;
   background-color: var(--text-color);
   color: var(--background-color);
-  border-radius: 7px;
+  border-radius: 9999px;
   cursor: pointer;
   font-family: var(--font-family);
+  font-size: 1.4em;
+  font-weight: 500;
+  line-height: 1.4;
+}
+/* The site's accent colour, like the Subscribe button, when it's known */
+.profile-info-header .ghap-follow-button.has-accent {
+  background-color: var(--accent-color);
+  color: #fff;
+}
+.profile-info-header .ghap-follow-button:hover {
+  opacity: 0.88;
 }
 .profile-image-placeholder {
   height: 100px;
@@ -90,11 +104,19 @@ const styles = `
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  height: 2.3em;
+  padding: 0 14px;
   border-radius: 9999px;
   text-decoration: none;
   font-weight: 500;
   line-height: 1.4;
+}
+/* Trim the space fonts leave above capitals and below the baseline, so the
+   letters themselves are centred. It has to be on a block: text directly in a
+   flex button sits in an anonymous box that doesn't get it. */
+.pill-label {
+  display: block;
+  text-box: trim-both cap alphabetic;
 }
 .profile-link {
   background-color: rgba(21, 23, 26, 0.06);
@@ -117,7 +139,7 @@ const styles = `
   height: 1.1em;
 }
 .profile-subscribe:hover {
-  filter: brightness(1.1);
+  opacity: 0.88;
 }
 .profile-username a {
   color: var(--ghap-text-color);
@@ -558,11 +580,11 @@ class GhostActivityPubEmbed extends HTMLElement {
     return `
             <div class="profile-links" part="profile-links">
               <a class="profile-link" href="${escapeHtml(links.website)}" target="_blank" rel="noopener">
-                ${links.icon ? `<img src="${escapeHtml(links.icon)}" alt="" onerror="this.remove()">` : ''}${escapeHtml(host)} ↗
+                ${links.icon ? `<img src="${escapeHtml(links.icon)}" alt="" onerror="this.remove()">` : ''}<span class="pill-label">${escapeHtml(host)} ↗</span>
               </a>
               ${links.subscribe ? `<a class="profile-subscribe" href="${escapeHtml(links.subscribe)}" target="_blank" rel="noopener"${links.accentColor ? ` style="--accent-color: ${links.accentColor}"` : ''}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                Subscribe ↗
+                <span class="pill-label">Subscribe ↗</span>
               </a>` : ''}
             </div>`;
   }
@@ -574,7 +596,7 @@ class GhostActivityPubEmbed extends HTMLElement {
           <div class="profile-info">
             <div class="profile-info-header">
               <img class="profile-icon" src="${escapeHtml(safeUrl(profileData.icon?.url) || avatarPlaceholder)}">
-              <button class="ghap-follow-button">Follow</button>
+              <button class="ghap-follow-button${links?.accentColor ? ' has-accent' : ''}"${links?.accentColor ? ` style="--accent-color: ${links.accentColor}"` : ''}><span class="pill-label">Follow</span></button>
             </div>
             <h2 class="profile-name">${escapeHtml(profileData.name)}</h2>
             <p class="profile-username">
@@ -832,7 +854,7 @@ class GhostActivityPubEmbed extends HTMLElement {
         }, 2000);
       }
 
-      if (event.target.matches('.ghap-follow-button')) {
+      if (event.target.closest('.ghap-follow-button')) {
         const followModalContent = document.createElement('div');
         followModalContent.innerHTML = `
           <h2>Follow me on the fediverse</h2>
