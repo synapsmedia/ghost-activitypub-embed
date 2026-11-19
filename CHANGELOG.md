@@ -1,3 +1,10 @@
+## [0.9.1](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.9.0...v0.9.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* pill-shaped Follow button, text centred in the pills ([9684ede](https://github.com/synapsmedia/ghost-activitypub-embed/commit/9684edecd219ceba66cbf5f7d18036a483177231))
+
 # [0.9.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.8.0...v0.9.0) (2026-11-19)
 
 
