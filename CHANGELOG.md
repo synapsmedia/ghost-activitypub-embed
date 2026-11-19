@@ -1,3 +1,10 @@
+# [0.9.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.8.0...v0.9.0) (2026-11-19)
+
+
+### Features
+
+* reply threads, site links, custom handles and safe HTML ([c948a05](https://github.com/synapsmedia/ghost-activitypub-embed/commit/c948a05b24e4dd53f99a6c55fa290c550c718cdd))
+
 # [0.8.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.7.5...v0.8.0) (2026-11-19)
 
 
