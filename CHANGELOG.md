@@ -1,3 +1,10 @@
+# [0.10.0](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.9.1...v0.10.0) (2026-11-27)
+
+
+### Features
+
+* profile-url makes the post author's avatar, name and handle a link ([90a625c](https://github.com/synapsmedia/ghost-activitypub-embed/commit/90a625c42e3df3d59773742c9087c077ac96408e))
+
 ## [0.9.1](https://github.com/synapsmedia/ghost-activitypub-embed/compare/v0.9.0...v0.9.1) (2026-11-19)
 
 
