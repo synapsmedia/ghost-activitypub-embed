@@ -295,11 +295,13 @@ const styles = `
 .thread-earlier:hover {
   color: rgb(21, 23, 26);
 }
-.feed-author-date a {
+.feed-author-date a,
+.feed-author a.feed-author-link {
   color: inherit;
   text-decoration: none;
 }
-.feed-author-date a:hover {
+.feed-author-date a:hover,
+.feed-author a.feed-author-link:hover {
   text-decoration: underline;
 }
 .feed-item-content .invisible {
@@ -615,23 +617,26 @@ class GhostActivityPubEmbed extends HTMLElement {
   renderItem(item, profileData) {
     // A single post is shown whatever its type; the feed shows articles only with include-posts
     const includePosts = this.hasAttribute('include-posts') || this.hasAttribute('post');
+    const profileLink = this.getAttribute('profile-url') || '';
     // Check if it's a Create activity with a Note
     if (item.type === 'Create' && item.object && (item.object.type === 'Note' || includePosts && item.object.type === 'Article')) {
       if (this.hasAttribute('post')) {
         return this.renderPost(item.object, profileData, {
           className: this._parent ? 'feed-item-main' : '',
           fullDate: true,
+          profileLink,
         });
       }
-      return this.renderPost(item.object, profileData);
+      return this.renderPost(item.object, profileData, { profileLink });
     }
     return '';
   }
 
   /**
-   * A note, or an article as a preview card. `link` makes the date a link to the post.
+   * A note, or an article as a preview card. `link` makes the date a link to the post,
+   * `profileLink` the author's avatar, name and handle links to their profile.
    */
-  renderPost(note, profileData, { className = '', link = '', fullDate = false } = {}) {
+  renderPost(note, profileData, { className = '', link = '', fullDate = false, profileLink = '' } = {}) {
     // Handle attachments (images); a note with several images has an array
     const attachment = [].concat(note.attachment || [])
       .filter((a) => a && a.type === 'Image' && safeUrl(a.url))
@@ -644,15 +649,23 @@ class GhostActivityPubEmbed extends HTMLElement {
       .map((u) => safeUrl(typeof u === 'string' ? u : u?.href))
       .find(Boolean) || '';
 
+    const authorHref = escapeHtml(safeUrl(profileLink));
+    const authorLink = (content) => authorHref
+      ? `<a class="feed-author-link" href="${authorHref}" target="_top">${content}</a>`
+      : content;
+    const avatar = `<img src="${escapeHtml(safeUrl(profileData.icon?.url) || avatarPlaceholder)}">`;
+    const name = escapeHtml(profileData.name || profileData.preferredUsername);
+    const handle = `@${escapeHtml(profileData.preferredUsername)}@${escapeHtml(profileData.serverHost)}`;
+
     return `
         <div class="feed-item ${className}" part="feed-item">
           <div class="feed-author" part="feed-author">
             <div class="feed-author-avatar" part="feed-author-avatar">
-              <img src="${escapeHtml(safeUrl(profileData.icon?.url) || avatarPlaceholder)}">
+              ${authorLink(avatar)}
             </div>
             <div class="feed-author-meta" part="feed-author-meta">
-              <div class="feed-author-name">${escapeHtml(profileData.name || profileData.preferredUsername)}</div>
-              <div class="feed-author-username">@${escapeHtml(profileData.preferredUsername)}@${escapeHtml(profileData.serverHost)} · <span class="feed-author-date">${dateLink ? `<a href="${escapeHtml(dateLink)}" target="_top">${date}</a>` : date}</span></div>
+              <div class="feed-author-name">${authorLink(name)}</div>
+              <div class="feed-author-username">${authorLink(handle)} · <span class="feed-author-date">${dateLink ? `<a href="${escapeHtml(dateLink)}" target="_top">${date}</a>` : date}</span></div>
             </div>
           </div>
           <div class="feed-item-content" part="feed-item-content">

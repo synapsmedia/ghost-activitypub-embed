@@ -37,6 +37,7 @@ You can use a Ghost HTNL Card to embed the component or edit your theme directly
 - `proxy` - Proxy URL to fetch the feed data through (optional)
 - `site-links` - Show a link to the profile's website, and a Subscribe button when the Ghost site takes sign-ups (opens its Portal sign-up) (default `false`)
 - `handle` - The profile's handle, like `@john@onolan.org`, when it's on another domain than the site (Ghost's custom social web domains). By default the handle is shown on the site's domain
+- `profile-url` - Where the post author's avatar, name and handle link to, like the profile's page. By default they aren't links (optional)
 - `post` - Show a single post under the profile header, not the feed. An ActivityPub object path like `note/<id>` or `article/<id>`, or the object's full URL (optional)
 
 ### Properties
